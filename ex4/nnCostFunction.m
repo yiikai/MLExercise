@@ -61,22 +61,35 @@ Theta2_grad = zeros(size(Theta2));
 %               the regularization separately and then add them to Theta1_grad
 %               and Theta2_grad from Part 2.
 %
+Theta1_x = Theta1(:,(2:end));  %femove bias unit
+Theta2_X = Theta2(:,(2:end));
+regterm = [Theta1_x(:);Theta2_X(:)]'*[Theta1_x(:);Theta2_X(:)]; %theata square
+ 
+class_y = zeros(m,num_labels); %get label matrix  (400*10)
+%label matrix assigment
+for i = 1:num_labels
+   class_y(:,1) = y==i;
+end
 
+%Feedforward
+a1 = [ones(m,1),X];
+z2 = a1*Theta1';
+a2 = sigmoid(z2);
+a2 = [ones(m,1),a2];
+z3 = a2*Theta2';
+h = sigmoid(z3);
+%Feedforward cost function
+J = -((class_y(:)'*(log(h(:)))) + ((1-class_y(:))'*(log(1-h(:))))-(lambda*regterm/2))/m;
 
+for i = 1:m
+    delta3(i,:) = h(i,:)-class_y(i,:);  %???
+    Theta2_grad = Theta2_grad+delta3(i,:)'*a2(i,:); %???,
+    delta2(i,:) = (delta3(i,:)*Theta2_X).*sigmoidGradient(z2(i,:));
+    Theta1_grad = Theta1_grad+delta2(i,:)'*a1(i,:);
+end
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+Theta1(:,1) = 0;
+Theta2(:,1) = 0;
 
 
 
@@ -85,7 +98,6 @@ Theta2_grad = zeros(size(Theta2));
 % =========================================================================
 
 % Unroll gradients
-grad = [Theta1_grad(:) ; Theta2_grad(:)];
-
+grad = ([Theta1_grad(:);Theta2_grad(:)]+lambda*[Theta1(:);Theta2(:)])/m;
 
 end
